@@ -6,12 +6,12 @@ import cv2
 import pandas as pd
 import random
 FURHAT_IP = "localhost"
+#from knc import predicted_val
 
 furhat = FurhatRemoteAPI(FURHAT_IP)
 furhat.set_led(red=100, green=50, blue=50)
 furhat.gesture(name="GazeAway")
 furhat.say(text="hello you")
-
 
 
 FACES = {
@@ -112,58 +112,72 @@ def set_persona(persona):
 def bsay(line):
     furhat.say(text=line, blocking=True)
 
-def demo_personas():
-    set_persona('Amany')
-    bsay("Hi there!")
-    
-    while (True):
-        inp=input('emtion')
-        #print("I'm reading\n")
-        dt = pd.read_csv('Response.csv')
-        dt_stat = dt[dt['emotion']==inp]
-        print(dt_stat['response'])
-        
-        if inp == 'anger':
+
+# function to repond to user emotion
+def emo_response(em):
+    dt = pd.read_csv('Response.csv')
+    dt_stat = dt[dt['emotion']==em]
+    #print(dt_stat['response'])
+    if em == 'anger':
                 if not dt_stat.empty:
                     bsay(random.choice(dt_stat['response'].dropna().tolist()))
                 else:
                     bsay('bad day?')
-        elif inp == 'sad':
+    elif em == 'sad':
                 if not dt_stat.null:
                     bsay(random.choice(dt_stat['response'].dropna().tolist()))
                 else:
                     bsay('bad day?')
-        elif inp == 'neutral':
+    elif em == 'neutral':
                 if not dt_stat.null:
                     bsay(random.choice(dt_stat['response'].dropna().tolist()))
                     furhat.gesture(name='Wink')
                 else:
                     bsay('What can I get you?')
                     furhat.gesture(name='Wink')
-        elif inp == 'happy':
+    elif em == 'happy':
                 if not dt_stat.null:
                     bsay(random.choice(dt_stat['response'].dropna().tolist()))
                     furhat.gesture(name='BigSmile')
                 else:
                     bsay('You look happy')
                     furhat.gesture(name='BigSmile')
+    else:
+        bsay("Strange I can't read you")
+
+
+# a function to process converation based on user reply
+def user_reply(re,dt):
+    if re.success:
+        match = dt[dt["user_reply"]==re.message]
+        print(match)
+        if match.empty:
+            bsay("Sorry, I didn't hear you")
         else:
-             bsay("Strange I can't read you")
+            bsay(match["bot_response"].iloc[0])
+    else:
+        bsay("Sorry, I didn't hear you")
 
+def demo_personas():
+    set_persona('Amany')
+    bsay("Hi there!")
 
-        # if(inp=='anger' or inp=='disgust' or inp=='sad'):
+    
+    while (True):
+        sleep(3)
 
-        #     bsay('bad day?')
-        # if(inp=='fear'):
-        #     bsay('Why you look like you see a ghost.')
-        # if(inp=='happy'):
-        #     furhat.gesture(name='BigSmile')
-        #     bsay('you look happy.')
-        # if(inp=='neutral'):
-        #     bsay('Shall I make something special to make you happy?')
-        #     furhat.gesture(name='Wink')
-        # if(inp=='surprise'):
-        #     bsay('What happened?')
+        # with open("shared_value.txt", "r") as file:
+        #     em = file.read()
+        em = 'anger'
+        dt = pd.read_csv(f"{em}.csv")
+        emo_response(em)
+        while(em!='noface'):
+            print("speak now ....")
+            re=furhat.listen()
+            print(re.message)
+            sleep(1)
+            user_reply(re,dt)
+        
 
         
         #recomment drinks
