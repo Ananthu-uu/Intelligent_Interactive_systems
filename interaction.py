@@ -2,7 +2,9 @@ from time import sleep
 from furhat_remote_api import FurhatRemoteAPI
 from numpy.random import randint
 import cv2
-import exercise_3_face_tracking_solved
+#import exercise_3_face_tracking_solved
+import pandas as pd
+import random
 FURHAT_IP = "localhost"
 
 furhat = FurhatRemoteAPI(FURHAT_IP)
@@ -113,20 +115,55 @@ def bsay(line):
 def demo_personas():
     set_persona('Amany')
     bsay("Hi there!")
+    
     while (True):
         inp=input('emtion')
-        if(inp=='anger' or inp=='disgust' or inp=='sad'):
-            bsay('bad day?')
-        if(inp=='fear'):
-            bsay('Why you look like you see a ghost.')
-        if(inp=='happy'):
-            furhat.gesture(name='BigSmile')
-            bsay('you look happy.')
-        if(inp=='neutral'):
-            bsay('Shall I make something special to make you happy?')
-            furhat.gesture(name='Wink')
-        if(inp=='surprise'):
-            bsay('What happened?')
+        #print("I'm reading\n")
+        dt = pd.read_csv('Response.csv')
+        dt_stat = dt[dt['emotion']==inp]
+        print(dt_stat['response'])
+        
+        if inp == 'anger':
+                if not dt_stat.empty:
+                    bsay(random.choice(dt_stat['response'].dropna().tolist()))
+                else:
+                    bsay('bad day?')
+        elif inp == 'sad':
+                if not dt_stat.null:
+                    bsay(random.choice(dt_stat['response'].dropna().tolist()))
+                else:
+                    bsay('bad day?')
+        elif inp == 'neutral':
+                if not dt_stat.null:
+                    bsay(random.choice(dt_stat['response'].dropna().tolist()))
+                    furhat.gesture(name='Wink')
+                else:
+                    bsay('What can I get you?')
+                    furhat.gesture(name='Wink')
+        elif inp == 'happy':
+                if not dt_stat.null:
+                    bsay(random.choice(dt_stat['response'].dropna().tolist()))
+                    furhat.gesture(name='BigSmile')
+                else:
+                    bsay('You look happy')
+                    furhat.gesture(name='BigSmile')
+        else:
+             bsay("Strange I can't read you")
+
+
+        # if(inp=='anger' or inp=='disgust' or inp=='sad'):
+
+        #     bsay('bad day?')
+        # if(inp=='fear'):
+        #     bsay('Why you look like you see a ghost.')
+        # if(inp=='happy'):
+        #     furhat.gesture(name='BigSmile')
+        #     bsay('you look happy.')
+        # if(inp=='neutral'):
+        #     bsay('Shall I make something special to make you happy?')
+        #     furhat.gesture(name='Wink')
+        # if(inp=='surprise'):
+        #     bsay('What happened?')
 
         
         #recomment drinks
