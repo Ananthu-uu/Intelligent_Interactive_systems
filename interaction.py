@@ -4,12 +4,12 @@ from numpy.random import randint
 import cv2
 import exercise_3_face_tracking_solved
 FURHAT_IP = "localhost"
+#from knc import predicted_val
 
 furhat = FurhatRemoteAPI(FURHAT_IP)
 furhat.set_led(red=100, green=50, blue=50)
 furhat.gesture(name="GazeAway")
 furhat.say(text="hello you")
-
 
 
 FACES = {
@@ -110,23 +110,42 @@ def set_persona(persona):
 def bsay(line):
     furhat.say(text=line, blocking=True)
 
+
+
 def demo_personas():
     set_persona('Amany')
     bsay("Hi there!")
+    """with open("shared_value.txt", "r") as file:
+        em = file.read()
+    
+    bsay(em)"""
     while (True):
-        inp=input('emtion')
-        if(inp=='anger' or inp=='disgust' or inp=='sad'):
-            bsay('bad day?')
-        if(inp=='fear'):
-            bsay('Why you look like you see a ghost.')
-        if(inp=='happy'):
-            furhat.gesture(name='BigSmile')
-            bsay('you look happy.')
-        if(inp=='neutral'):
-            bsay('Shall I make something special to make you happy?')
-            furhat.gesture(name='Wink')
-        if(inp=='surprise'):
-            bsay('What happened?')
+        sleep(3)
+
+        with open("shared_value.txt", "r") as file:
+            em = file.read()
+        while(em!='noface'):
+        
+            if(em=='anger' or em=='disgust' or em=='sad'):
+                bsay('bad day?')
+            if(em=='fear'):
+                bsay('Why you look like you see a ghost.')
+            if(em=='happy'):
+                furhat.gesture(name='BigSmile')
+                bsay('you look happy.')
+            if(em=='neutral'):
+                bsay('Shall I make something special to make you happy?')
+                #furhat.ask('Shall I make something special to make you happy?')
+                furhat.gesture(name='Wink')
+                # Start listening for speech
+                re=furhat.listen()
+                if(re.success):
+                    if(re.message=='do you have any suggestion'):
+                        bsay('maybe a glass of beer')
+                
+            if(em=='surprise'):
+                bsay('What happened?')
+        
 
         
         #recomment drinks
